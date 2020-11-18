@@ -4,12 +4,11 @@ import json
 
 client_id = 'i46n02109k2dwzjjixo6qpah3a8xtu'
 client_secret = 'l0ketr91icxhhyl4is5qb4glnt12gj'
-id_url_base = 'https://id.twitch.tv/'
-api_url_base = 'https://api.twitch.tv/'
 
-def get_app_token(url, client_id, secret):
+
+def get_app_token(client_id, secret):
     params = {'client_id': client_id, 'client_secret': client_secret, 'grant_type': 'client_credentials'}
-    response = requests.post('{0}oauth2/token'.format(id_url_base), params=params)
+    response = requests.post('https://id.twitch.tv/oauth2/token', params=params)
     if response.status_code == 200:
         return json.loads(response.content.decode('utf-8'))['access_token']
     else:
@@ -25,7 +24,7 @@ class TwitchAPI:
         return s
 
     def __init__(self):
-        self.oauth = get_app_token(id_url_base, client_id, client_secret)
+        self.oauth = get_app_token(client_id, client_secret)
         self.session = self._session(self.oauth)
 
 

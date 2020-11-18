@@ -1,14 +1,39 @@
 import os
+import sys
 import requests
 import face_recognition
+from subprocess import Popen, PIPE
+
 from twitch_api import TwitchAPI
+
+class Stream(object):
+    def __init__(self, channel: str, vid: str, quality: str = 'best',
+                 threads: int = 1, oauth: str = None):
+        self.channel = channel
+        self.url = f'https://twitch.tv/{channel}'
+        self.vid = vid
+        self.quality = quality
+        self.threads = threads
+        self.oauth = oauth
+
+    def _args(self) -> list:
+        params = {'hls-timeout': 60,
+                  'hls-segment-timeout': 60,
+                  'hls-segment-attempts': 5,
+                  'hls-segment-threads': self.threads}
+
+        if self.oauth:
+            params['twitch-oauth-token'] = self.oauth
+
+        return [f'--{key}={value}' for key, value in params.items()]
+
 
 
 def get_active_streams(size = (500, 500)):
     api = TwitchAPI()
     streams = api.helix('streams')['data']
     print('retrieved {0} active streams'.format(len(streams)))
-    face_streams = [stream for stream in streams if detect_face(stream, size)]
+    face_streams = [Stream(stream['user_name'], stream['id']) for stream in streams if detect_face(stream, size)]
     print('detected {0} active streams with face cam'.format(len(face_streams)))
 
     return face_streams
@@ -33,7 +58,4 @@ def detect_face(stream, size):
 
     return face
 
-#t = get_active_streams()
-
-#print(t)
 
