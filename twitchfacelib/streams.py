@@ -1,10 +1,8 @@
 import os
-import sys
 import requests
 import face_recognition
-from subprocess import Popen, PIPE
 
-from twitch_api import TwitchAPI
+from .twitch_api import TwitchAPI
 
 class Stream(object):
     def __init__(self, channel: str, vid: str, quality: str = 'best',
@@ -29,17 +27,17 @@ class Stream(object):
 
 
 
-def get_active_streams(size = (500, 500)):
+def get_active_streams():
     api = TwitchAPI()
-    streams = api.helix('streams')['data']
+    streams = api.helix('streams', **{'first': 20})['data']
     print('retrieved {0} active streams'.format(len(streams)))
-    face_streams = [Stream(stream['user_name'], stream['id']) for stream in streams if detect_face(stream, size)]
+    face_streams = [Stream(stream['user_name'], stream['id']) for stream in streams if detect_face(stream)]
     print('detected {0} active streams with face cam'.format(len(face_streams)))
 
     return face_streams
 
 
-def detect_face(stream, size):
+def detect_face(stream, size = (500, 500)):
     face = False
     url = stream['thumbnail_url'].format(width = size[0], height = size[1])
     file = '{0}.jpg'.format(stream['id'])
