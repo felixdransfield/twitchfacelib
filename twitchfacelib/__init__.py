@@ -15,6 +15,10 @@ def main(argv=None):
         from .record import main as record_main
         record_main()
 
+    if args['<command>'] == 'test':
+        from .test import main as test_main
+        test_main()
+
 
 if __name__ == '__main__':
     main()
